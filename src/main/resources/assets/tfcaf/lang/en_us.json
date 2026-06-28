@@ -1,7 +1,17 @@
 {
-  "key.eternal130.switchAutoForging":"Switch automatic forging function",
-  "key.eternal130.switchAutoForging.info":"automatic forging function has been toggled to %s",
-  "key.eternal130.switchForgingTip":"Switch forging tip function",
-  "key.eternal130.switchForgingTip.info":"forging tip function has been toggled to %s",
-  "key.categories.tfcaf":"tfctng auto forging"
+  "key.eternal130.switchAutoForging": "Switch automatic forging function",
+  "key.eternal130.switchAutoForging.info": "Automatic forging: %s",
+  "key.eternal130.switchForgingTip": "Switch forging tip function",
+  "key.eternal130.switchForgingTip.info": "Forging tip: %s",
+  "key.categories.tfcaf": "tfctng auto forging",
+
+  "tfcaf.settings.title": "TFC Auto Forging - Settings",
+  "tfcaf.settings.whitelist": "Whitelist",
+  "tfcaf.settings.innerPolicy": "In Whitelist:",
+  "tfcaf.settings.outerPolicy": "Outside Whitelist:",
+  "tfcaf.autoPolicy.tap": "Tap to Activate",
+  "tfcaf.autoPolicy.auto": "Full Auto",
+  "tfcaf.outerPolicy.never": "Never",
+  "tfcaf.outerPolicy.tap": "Tap to Activate",
+  "tfcaf.outerPolicy.auto": "Full Auto"
 }
