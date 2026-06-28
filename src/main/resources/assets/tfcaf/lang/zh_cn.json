@@ -9,9 +9,9 @@
   "tfcaf.settings.whitelist": "白名单",
   "tfcaf.settings.innerPolicy": "白名单内:",
   "tfcaf.settings.outerPolicy": "白名单外:",
-  "tfcaf.autoPolicy.tap": "轻敲激活",
+  "tfcaf.autoPolicy.tap": "操作激活",
   "tfcaf.autoPolicy.auto": "全自动",
   "tfcaf.outerPolicy.never": "永不",
-  "tfcaf.outerPolicy.tap": "轻敲激活",
+  "tfcaf.outerPolicy.tap": "操作激活",
   "tfcaf.outerPolicy.auto": "全自动"
 }

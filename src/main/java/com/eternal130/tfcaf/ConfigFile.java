@@ -92,12 +92,16 @@ public class ConfigFile {
 
     public static void setWhitelist(List<String> items) {
         whitelistRaw.set(String.join(",", items));
-        lastRawWhitelist = "";
+        whitelistCache = items.isEmpty()
+                ? Collections.emptySet()
+                : new HashSet<>(items);
+        lastRawWhitelist = whitelistRaw.get();
+        CONFIG.save();
     }
 
     public static boolean isInWhitelist(String registryName) {
         String raw = whitelistRaw.get();
-        if (!raw.equals(lastRawWhitelist)) {
+        if (!Objects.equals(raw, lastRawWhitelist)) {
             lastRawWhitelist = raw;
             if (raw.isEmpty()) {
                 whitelistCache = Collections.emptySet();

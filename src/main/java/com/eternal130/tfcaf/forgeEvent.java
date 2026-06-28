@@ -94,6 +94,8 @@ public class forgeEvent {
                         TFCAutoForging.tapActivated = true;
                     }
 
+                    TFCAutoForging.lastWorkValue = currentPoint;
+
                     int ruleOffset = 0;
                     ForgeSteps steps = forging.getSteps();
                     int[] lastOperations = getRules(anvilRecipe.getRules());
@@ -183,13 +185,10 @@ public class forgeEvent {
                             return;
                         }
 
-                        TFCAutoForging.lastWorkValue = currentPoint;
+                        event.getScreen().mouseClicked(x + 8, y + 8, 0);
                         TFCAutoForging.isWaitingForServer = true;
                         TFCAutoForging.timer = ConfigFile.autoForgingCooldown.get();
-                        event.getScreen().mouseClicked(x + 8, y + 8, 0);
                     }
-
-                    TFCAutoForging.lastWorkValue = currentPoint;
                 }
             }
         } catch (Exception exception) {
