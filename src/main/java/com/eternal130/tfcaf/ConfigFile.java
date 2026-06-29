@@ -58,11 +58,11 @@ public class ConfigFile {
         innerPolicy = BUILDER.comment("Policy for items INSIDE whitelist: TAP or AUTO")
                 .define("innerPolicy", "AUTO");
         outerPolicy = BUILDER.comment("Policy for items OUTSIDE whitelist: NEVER, TAP, or AUTO")
-                .define("outerPolicy", "NEVER");
+                .define("outerPolicy", "TAP");
         whitelistRaw = BUILDER.comment("Comma-separated list of item registry names in the whitelist")
                 .define("whitelistItems", "");
         forgeSpeed = BUILDER.comment("Forging speed: EXTREME, FAST, MODERATE, SAFE")
-                .define("forgeSpeed", "SAFE");
+                .define("forgeSpeed", "FAST");
         BUILDER.pop();
 
         CONFIG = BUILDER.build();

@@ -70,7 +70,7 @@ public class SettingsScreen extends Screen {
         int buttonHeight = 20;
         int buttonX = this.leftPos + 10;
 
-        addRenderableWidget(CycleButton.<ConfigFile.AutoPolicy>builder(policy ->
+        var innerBtn = addRenderableWidget(CycleButton.<ConfigFile.AutoPolicy>builder(policy ->
                 Component.translatable("tfcaf.autoPolicy." + policy.name().toLowerCase()))
             .withValues(ConfigFile.AutoPolicy.values())
             .withInitialValue(localInner)
@@ -80,7 +80,7 @@ public class SettingsScreen extends Screen {
                 savePolicies();
             }));
 
-        addRenderableWidget(CycleButton.<ConfigFile.OuterPolicy>builder(policy ->
+        var outerBtn = addRenderableWidget(CycleButton.<ConfigFile.OuterPolicy>builder(policy ->
                 Component.translatable("tfcaf.outerPolicy." + policy.name().toLowerCase()))
             .withValues(ConfigFile.OuterPolicy.values())
             .withInitialValue(localOuter)
@@ -90,7 +90,7 @@ public class SettingsScreen extends Screen {
                 savePolicies();
             }));
 
-        addRenderableWidget(CycleButton.<ConfigFile.ForgeSpeed>builder(speed ->
+        var speedBtn = addRenderableWidget(CycleButton.<ConfigFile.ForgeSpeed>builder(speed ->
                 Component.translatable("tfcaf.forgeSpeed." + speed.name().toLowerCase()))
             .withValues(ConfigFile.ForgeSpeed.values())
             .withInitialValue(localSpeed)
@@ -127,9 +127,12 @@ public class SettingsScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        if (Minecraft.getInstance().player == null) return;
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+    protected void setInitialFocus() {
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         guiGraphics.fill(this.leftPos, this.topPos, this.leftPos + this.imageWidth, this.topPos + this.imageHeight, 0xFFC6C6C6);
         guiGraphics.fill(this.leftPos, this.topPos, this.leftPos + this.imageWidth, this.topPos + 1, 0xFFFFFFFF);
@@ -137,12 +140,17 @@ public class SettingsScreen extends Screen {
         guiGraphics.fill(this.leftPos + this.imageWidth - 1, this.topPos, this.leftPos + this.imageWidth, this.topPos + this.imageHeight, 0xFF555555);
         guiGraphics.fill(this.leftPos, this.topPos + this.imageHeight - 1, this.leftPos + this.imageWidth, this.topPos + this.imageHeight, 0xFF555555);
 
-        guiGraphics.drawString(this.font, this.title.getString(), this.leftPos + 8, this.topPos + 8, 0x404040, false);
+        guiGraphics.drawString(this.font, this.title.getString(), this.leftPos + 8, this.topPos + 8, 0xFF404040, false);
 
         String whitelistLabel = Component.translatable("tfcaf.settings.whitelist").getString();
         int whitelistTextX = this.leftPos + 135 + (3 * SLOT_SIZE) / 2;
         guiGraphics.drawString(this.font, whitelistLabel,
-                whitelistTextX - this.font.width(whitelistLabel) / 2, this.topPos + 12, 0x404040, false);
+                whitelistTextX - this.font.width(whitelistLabel) / 2, this.topPos + 12, 0xFF404040, false);
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        if (Minecraft.getInstance().player == null) return;
 
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
