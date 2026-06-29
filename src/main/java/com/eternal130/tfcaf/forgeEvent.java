@@ -187,7 +187,7 @@ public class forgeEvent {
 
                         event.getScreen().mouseClicked(x + 8, y + 8, 0);
                         TFCAutoForging.isWaitingForServer = true;
-                        TFCAutoForging.timer = ConfigFile.autoForgingCooldown.get();
+                        TFCAutoForging.timer = ConfigFile.getCooldown();
                     }
                 }
             }

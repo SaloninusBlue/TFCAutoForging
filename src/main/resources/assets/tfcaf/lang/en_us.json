@@ -6,12 +6,17 @@
   "key.categories.tfcaf": "tfctng auto forging",
 
   "tfcaf.settings.title": "TFC Auto Forging - Settings",
-  "tfcaf.settings.whitelist": "Whitelist",
-  "tfcaf.settings.innerPolicy": "In Whitelist:",
-  "tfcaf.settings.outerPolicy": "Outside Whitelist:",
+  "tfcaf.settings.whitelist": "Target Item Whitelist",
+  "tfcaf.settings.innerPolicy": "Inside",
+  "tfcaf.settings.outerPolicy": "Outside",
   "tfcaf.autoPolicy.tap": "Tap to Activate",
   "tfcaf.autoPolicy.auto": "Full Auto",
   "tfcaf.outerPolicy.never": "Never",
   "tfcaf.outerPolicy.tap": "Tap to Activate",
-  "tfcaf.outerPolicy.auto": "Full Auto"
+  "tfcaf.outerPolicy.auto": "Full Auto",
+  "tfcaf.forgeSpeed": "Speed",
+  "tfcaf.forgeSpeed.extreme": "Extreme",
+  "tfcaf.forgeSpeed.fast": "Fast",
+  "tfcaf.forgeSpeed.moderate": "Moderate",
+  "tfcaf.forgeSpeed.safe": "Safe"
 }

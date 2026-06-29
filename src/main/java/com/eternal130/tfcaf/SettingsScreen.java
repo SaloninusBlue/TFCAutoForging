@@ -2,7 +2,7 @@ package com.eternal130.tfcaf;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -17,8 +17,12 @@ import java.util.List;
 public class SettingsScreen extends Screen {
 
     private static final int SLOT_SIZE = 18;
-    private static final int SLOT_GAP = 2;
     private static final int TOTAL_SLOTS = 9;
+
+    private final int imageWidth = 210;
+    private final int imageHeight = 185;
+    private int leftPos;
+    private int topPos;
 
     private final SimpleContainer filterInventory;
     private final int[] slotX = new int[TOTAL_SLOTS];
@@ -29,6 +33,7 @@ public class SettingsScreen extends Screen {
 
     private ConfigFile.AutoPolicy localInner;
     private ConfigFile.OuterPolicy localOuter;
+    private ConfigFile.ForgeSpeed localSpeed;
 
     private ItemStack phantomCursor = ItemStack.EMPTY;
 
@@ -37,6 +42,7 @@ public class SettingsScreen extends Screen {
         filterInventory = new SimpleContainer(TOTAL_SLOTS);
         localInner = ConfigFile.getInnerPolicy();
         localOuter = ConfigFile.getOuterPolicy();
+        localSpeed = ConfigFile.getForgeSpeed();
 
         List<String> saved = ConfigFile.getWhitelist();
         for (int i = 0; i < Math.min(TOTAL_SLOTS, saved.size()); i++) {
@@ -55,46 +61,70 @@ public class SettingsScreen extends Screen {
 
     @Override
     protected void init() {
-        // Whitelist grid — left side
-        int gridX = 30;
-        int gridY = 26;
+        super.init();
+
+        this.leftPos = (this.width - this.imageWidth) / 2;
+        this.topPos = (this.height - this.imageHeight) / 2;
+
+        int buttonWidth = 110;
+        int buttonHeight = 20;
+        int buttonX = this.leftPos + 10;
+
+        addRenderableWidget(CycleButton.<ConfigFile.AutoPolicy>builder(policy ->
+                Component.translatable("tfcaf.autoPolicy." + policy.name().toLowerCase()))
+            .withValues(ConfigFile.AutoPolicy.values())
+            .withInitialValue(localInner)
+            .create(buttonX, this.topPos + 25, buttonWidth, buttonHeight,
+                    Component.translatable("tfcaf.settings.innerPolicy"), (button, value) -> {
+                localInner = value;
+                savePolicies();
+            }));
+
+        addRenderableWidget(CycleButton.<ConfigFile.OuterPolicy>builder(policy ->
+                Component.translatable("tfcaf.outerPolicy." + policy.name().toLowerCase()))
+            .withValues(ConfigFile.OuterPolicy.values())
+            .withInitialValue(localOuter)
+            .create(buttonX, this.topPos + 50, buttonWidth, buttonHeight,
+                    Component.translatable("tfcaf.settings.outerPolicy"), (button, value) -> {
+                localOuter = value;
+                savePolicies();
+            }));
+
+        addRenderableWidget(CycleButton.<ConfigFile.ForgeSpeed>builder(speed ->
+                Component.translatable("tfcaf.forgeSpeed." + speed.name().toLowerCase()))
+            .withValues(ConfigFile.ForgeSpeed.values())
+            .withInitialValue(localSpeed)
+            .create(buttonX, this.topPos + 75, buttonWidth, buttonHeight,
+                    Component.translatable("tfcaf.forgeSpeed"), (button, value) -> {
+                localSpeed = value;
+                savePolicies();
+            }));
+
+        // Whitelist 3×3 — right side, bottom-aligned with last policy button
+        int gridX = this.leftPos + 135;
+        int gridY = this.topPos + 95 - 3 * SLOT_SIZE;
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 int idx = row * 3 + col;
-                slotX[idx] = gridX + col * (SLOT_SIZE + SLOT_GAP);
-                slotY[idx] = gridY + row * (SLOT_SIZE + SLOT_GAP);
+                slotX[idx] = gridX + col * SLOT_SIZE;
+                slotY[idx] = gridY + row * SLOT_SIZE;
             }
         }
 
-        // Policy buttons — right side
-        int btnLeftX = 120;
-        int btnRightX = 200;
-        int arrowSize = 20;
-
-        addRenderableWidget(Button.builder(Component.literal("◄"), b -> cycleInnerLeft())
-                .bounds(btnLeftX, 26, arrowSize, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("►"), b -> cycleInnerRight())
-                .bounds(btnRightX, 26, arrowSize, 20).build());
-
-        addRenderableWidget(Button.builder(Component.literal("◄"), b -> cycleOuterLeft())
-                .bounds(btnLeftX, 58, arrowSize, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("►"), b -> cycleOuterRight())
-                .bounds(btnRightX, 58, arrowSize, 20).build());
-
-        // Backpack slot positions — 9 per row, 4 rows
-        int bagStartX = (this.width - (9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP)) / 2;
-        int bagStartY = 100;
+        // Backpack — bottom
+        int bagStartX = this.leftPos + (this.imageWidth - (9 * SLOT_SIZE)) / 2;
+        int bagStartY = this.topPos + 100;
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                int idx = 9 + row * 9 + col; // slots 9-35 (main inventory)
-                bagX[idx] = bagStartX + col * (SLOT_SIZE + SLOT_GAP);
-                bagY[idx] = bagStartY + row * (SLOT_SIZE + SLOT_GAP);
+                int idx = 9 + row * 9 + col;
+                bagX[idx] = bagStartX + col * SLOT_SIZE;
+                bagY[idx] = bagStartY + row * SLOT_SIZE;
             }
         }
         for (int col = 0; col < 9; col++) {
-            int idx = col; // slots 0-8 (hotbar)
-            bagX[idx] = bagStartX + col * (SLOT_SIZE + SLOT_GAP);
-            bagY[idx] = bagStartY + 3 * (SLOT_SIZE + SLOT_GAP);
+            int idx = col;
+            bagX[idx] = bagStartX + col * SLOT_SIZE;
+            bagY[idx] = bagStartY + 3 * SLOT_SIZE + 4;
         }
     }
 
@@ -103,38 +133,36 @@ public class SettingsScreen extends Screen {
         if (Minecraft.getInstance().player == null) return;
         this.renderBackground(guiGraphics);
 
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 6, 0xFFFFFF);
+        // Panel background
+        guiGraphics.fill(this.leftPos, this.topPos, this.leftPos + this.imageWidth, this.topPos + this.imageHeight, 0xFFC6C6C6);
+        guiGraphics.fill(this.leftPos, this.topPos, this.leftPos + this.imageWidth, this.topPos + 1, 0xFFFFFFFF);
+        guiGraphics.fill(this.leftPos, this.topPos, this.leftPos + 1, this.topPos + this.imageHeight, 0xFFFFFFFF);
+        guiGraphics.fill(this.leftPos + this.imageWidth - 1, this.topPos, this.leftPos + this.imageWidth, this.topPos + this.imageHeight, 0xFF555555);
+        guiGraphics.fill(this.leftPos, this.topPos + this.imageHeight - 1, this.leftPos + this.imageWidth, this.topPos + this.imageHeight, 0xFF555555);
 
-        // Whitelist label
-        guiGraphics.drawString(this.font,
-                Component.translatable("tfcaf.settings.whitelist"),
-                30, 10, 0xA0A0A0);
+        // Title
+        guiGraphics.drawString(this.font, this.title.getString(), this.leftPos + 8, this.topPos + 8, 0x404040, false);
+
+        // Whitelist label — centered above grid
+        String whitelistLabel = Component.translatable("tfcaf.settings.whitelist").getString();
+        int whitelistTextX = this.leftPos + 135 + (3 * SLOT_SIZE) / 2;
+        guiGraphics.drawString(this.font, whitelistLabel,
+                whitelistTextX - this.font.width(whitelistLabel) / 2, this.topPos + 12, 0x404040, false);
+
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         // Render whitelist slots
         for (int i = 0; i < TOTAL_SLOTS; i++) {
-            renderSlot(guiGraphics, i, slotX[i], slotY[i], filterInventory.getItem(i), mouseX, mouseY);
+            renderSlot(guiGraphics, slotX[i], slotY[i], filterInventory.getItem(i), mouseX, mouseY);
         }
 
         // Render bag slots
         Inventory inv = Minecraft.getInstance().player.getInventory();
         for (int i = 0; i < 36; i++) {
-            renderSlot(guiGraphics, i, bagX[i], bagY[i], inv.getItem(i), mouseX, mouseY);
+            renderSlot(guiGraphics, bagX[i], bagY[i], inv.getItem(i), mouseX, mouseY);
         }
 
-        // Policy labels
-        String innerVal = Component.translatable("tfcaf.autoPolicy." + localInner.name().toLowerCase()).getString();
-        guiGraphics.drawString(this.font,
-                Component.translatable("tfcaf.settings.innerPolicy"), 120, 12, 0xA0A0A0);
-        guiGraphics.drawCenteredString(this.font, innerVal, 170, 28, 0xFFFFFF);
-
-        String outerVal = Component.translatable("tfcaf.outerPolicy." + localOuter.name().toLowerCase()).getString();
-        guiGraphics.drawString(this.font,
-                Component.translatable("tfcaf.settings.outerPolicy"), 120, 46, 0xA0A0A0);
-        guiGraphics.drawCenteredString(this.font, outerVal, 170, 60, 0xFFFFFF);
-
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-
-        // Tooltip for whitelist slots
+        // Tooltips
         for (int i = 0; i < TOTAL_SLOTS; i++) {
             if (mouseInSlot(mouseX, mouseY, slotX[i], slotY[i])) {
                 ItemStack stack = filterInventory.getItem(i);
@@ -144,7 +172,7 @@ public class SettingsScreen extends Screen {
             }
         }
 
-        // Render phantom cursor
+        // Phantom cursor
         if (!phantomCursor.isEmpty()) {
             guiGraphics.renderItem(phantomCursor, mouseX - 8, mouseY - 8);
             guiGraphics.renderItemDecorations(this.font, phantomCursor, mouseX - 8, mouseY - 8);
@@ -157,7 +185,6 @@ public class SettingsScreen extends Screen {
         int mx = (int) mouseX;
         int my = (int) mouseY;
 
-        // Whitelist slots
         for (int i = 0; i < TOTAL_SLOTS; i++) {
             if (mouseInSlot(mx, my, slotX[i], slotY[i])) {
                 if (button == 1) {
@@ -181,7 +208,6 @@ public class SettingsScreen extends Screen {
             }
         }
 
-        // Bag slots
         Inventory inv = Minecraft.getInstance().player.getInventory();
         for (int i = 0; i < 36; i++) {
             if (mouseInSlot(mx, my, bagX[i], bagY[i])) {
@@ -190,9 +216,7 @@ public class SettingsScreen extends Screen {
                     phantomCursor = ItemStack.EMPTY;
                     return true;
                 }
-
                 if (button == 1) {
-                    // Right-click → add to first empty whitelist slot, save
                     for (int j = 0; j < TOTAL_SLOTS; j++) {
                         if (filterInventory.getItem(j).isEmpty()) {
                             filterInventory.setItem(j, bagStack.copyWithCount(1));
@@ -211,7 +235,6 @@ public class SettingsScreen extends Screen {
             }
         }
 
-        // Clicked empty area → clear phantom cursor
         if (button == 0) {
             phantomCursor = ItemStack.EMPTY;
         }
@@ -241,17 +264,22 @@ public class SettingsScreen extends Screen {
     private void savePolicies() {
         ConfigFile.setInnerPolicy(localInner);
         ConfigFile.setOuterPolicy(localOuter);
+        ConfigFile.setForgeSpeed(localSpeed);
         ConfigFile.save();
     }
 
-    private void renderSlot(GuiGraphics guiGraphics, int index, int x, int y,
+    private void renderSlot(GuiGraphics guiGraphics, int x, int y,
                             ItemStack stack, int mouseX, int mouseY) {
         boolean hovered = mouseInSlot(mouseX, mouseY, x, y);
 
-        guiGraphics.fill(x, y, x + SLOT_SIZE, y + SLOT_SIZE, 0xFF373737);
+        guiGraphics.fill(x, y, x + SLOT_SIZE, y + SLOT_SIZE, 0xFF8B8B8B);
+        guiGraphics.fill(x, y, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, 0xFF373737);
         guiGraphics.fill(x + 1, y + 1, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, 0xFF8B8B8B);
+        guiGraphics.fill(x + 1, y + 1, x + SLOT_SIZE, y + SLOT_SIZE, 0xFFFFFFFF);
+        guiGraphics.fill(x + 1, y + 1, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, 0xFF8B8B8B);
+
         if (hovered) {
-            guiGraphics.fill(x + 1, y + 1, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, 0xBBFFFFFF);
+            guiGraphics.fill(x + 1, y + 1, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, 0x80FFFFFF);
         }
 
         if (!stack.isEmpty()) {
@@ -262,35 +290,6 @@ public class SettingsScreen extends Screen {
 
     private boolean mouseInSlot(int mx, int my, int x, int y) {
         return mx >= x && mx < x + SLOT_SIZE && my >= y && my < y + SLOT_SIZE;
-    }
-
-    private void cycleInnerLeft() {
-        localInner = (localInner == ConfigFile.AutoPolicy.AUTO)
-                ? ConfigFile.AutoPolicy.TAP
-                : ConfigFile.AutoPolicy.AUTO;
-        savePolicies();
-    }
-
-    private void cycleInnerRight() {
-        cycleInnerLeft();
-    }
-
-    private void cycleOuterLeft() {
-        switch (localOuter) {
-            case NEVER -> localOuter = ConfigFile.OuterPolicy.TAP;
-            case TAP -> localOuter = ConfigFile.OuterPolicy.AUTO;
-            case AUTO -> localOuter = ConfigFile.OuterPolicy.NEVER;
-        }
-        savePolicies();
-    }
-
-    private void cycleOuterRight() {
-        switch (localOuter) {
-            case NEVER -> localOuter = ConfigFile.OuterPolicy.AUTO;
-            case AUTO -> localOuter = ConfigFile.OuterPolicy.TAP;
-            case TAP -> localOuter = ConfigFile.OuterPolicy.NEVER;
-        }
-        savePolicies();
     }
 
     public static void open() {

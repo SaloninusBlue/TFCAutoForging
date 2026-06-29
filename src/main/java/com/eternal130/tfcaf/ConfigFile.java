@@ -19,6 +19,8 @@ public class ConfigFile {
     public static final ForgeConfigSpec.ConfigValue<String> outerPolicy;
     public static final ForgeConfigSpec.ConfigValue<String> whitelistRaw;
 
+    public static final ForgeConfigSpec.ConfigValue<String> forgeSpeed;
+
     public static ForgeConfigSpec CONFIG;
 
     private static Set<String> whitelistCache = Collections.emptySet();
@@ -26,6 +28,7 @@ public class ConfigFile {
 
     public enum AutoPolicy { TAP, AUTO }
     public enum OuterPolicy { NEVER, TAP, AUTO }
+    public enum ForgeSpeed { EXTREME, FAST, MODERATE, SAFE }
 
     public ConfigFile() {}
 
@@ -59,6 +62,8 @@ public class ConfigFile {
                 .define("outerPolicy", "NEVER");
         whitelistRaw = BUILDER.comment("Comma-separated list of item registry names in the whitelist")
                 .define("whitelistItems", "");
+        forgeSpeed = BUILDER.comment("Forging speed: EXTREME, FAST, MODERATE, SAFE")
+                .define("forgeSpeed", "SAFE");
         BUILDER.pop();
 
         CONFIG = BUILDER.build();
@@ -80,6 +85,24 @@ public class ConfigFile {
 
     public static void setOuterPolicy(OuterPolicy policy) {
         outerPolicy.set(policy.name());
+    }
+
+    public static ForgeSpeed getForgeSpeed() {
+        try { return ForgeSpeed.valueOf(forgeSpeed.get().toUpperCase()); }
+        catch (IllegalArgumentException e) { return ForgeSpeed.SAFE; }
+    }
+
+    public static void setForgeSpeed(ForgeSpeed speed) {
+        forgeSpeed.set(speed.name());
+    }
+
+    public static int getCooldown() {
+        return switch (getForgeSpeed()) {
+            case EXTREME -> 0;
+            case FAST -> 5;
+            case MODERATE -> 10;
+            case SAFE -> 20;
+        };
     }
 
     public static List<String> getWhitelist() {
